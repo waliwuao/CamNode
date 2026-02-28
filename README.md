@@ -1,35 +1,50 @@
-# CamNode
+### CamNode 移动端应用 (React Native / Expo)
 
-CamNode is a lightweight, remote-controlled camera node agent.
+# CamNode - 移动端远程相机代理
 
-## Binding Process
+CamNode 是一款专为工业检测、远程监控和计算机视觉开发设计的极简移动端 App。它将 iPhone 转化为一个高性能的“远程相机节点”，允许电脑通过局域网实时操控镜头的缩放、对焦，并获取物理传感器能达到的最高分辨率图像。
 
-1. Click the scan button (top-left).
-2. Scan a QR code containing the PC server URL (e.g., `http://192.168.1.100:8000`).
-3. The indicator (top-right) will turn green upon successful connection.
+## 🚀 核心特性
 
-## WebSocket API (Control Plane)
+*   **极简设计**：全屏取景框，无干扰 UI，最大化硬件拍摄区域。
+*   **API 驱动**：通过 WebSocket 实现亚秒级延迟的控制响应。
+*   **最高画质**：强制锁定硬件物理最高分辨率（如 12MP/48MP），支持无损 JPEG 回传。
+*   **智能绑定**：支持 QR 码扫描极速绑定电脑端，自动识别局域网 IP。
+*   **实时反馈**：右上角三色指示灯实时显示连接状态（红：断开；黄：尝试连接；绿：已就绪）。
+*   **极致轻量**：基于 Expo SDK 54 构建，专为 iOS 高性能成像优化。
 
-### Supported Inbound Commands (PC -> Mobile)
+## 🛠️ 技术栈
 
-Emit these commands to the `control` event.
+*   **框架**: Expo (SDK 54) / React Native
+*   **成像**: `expo-camera` (支持最高物理分辨率)
+*   **通信**: `socket.io-client` (实时指令通道), `fetch/FormData` (图像传输通道)
+*   **样式**: 响应式 StyleSheet，适配 iOS 安全区域。
 
-| Type | Payload | Description |
+## 📥 安装与运行
+
+1.  **环境要求**:
+    *   安装 Node.js (v18+)。
+    *   iPhone 端安装最新版 **Expo Go**。
+
+2.  **安装依赖**:
+    ```bash
+    npm install
+    ```
+
+3.  **启动项目**:
+    ```bash
+    npx expo start -c
+    ```
+
+4.  **操作流程**:
+    *   打开手机端 App，点击左上角 **Scan** 图标。
+    *   扫描 `CamNode-SDK` 启动后在终端显示的二维码。
+    *   连接成功后（绿灯亮起），等待电脑端下达指令。
+
+## 📝 接口协议
+
+| 动作类型 | 载荷参数 | 说明 |
 | :--- | :--- | :--- |
-| `SET_ZOOM` | `{ "value": 0.5 }` | Set zoom level (0.0 to 1.0) |
-| `AUTO_FOCUS` | `none` | Trigger auto-focus action |
-| `TAKE_PHOTO` | `{ "quality": 1 }` | Capture and upload high-res photo |
-
-### Outbound Events (Mobile -> PC)
-
-| Event | Payload | Description |
-| :--- | :--- | :--- |
-| `status_update` | `{ "status": "capturing" }` | Sent when device state changes |
-| `error` | `{ "message": "..." }` | Sent when an error occurs |
-
-## HTTP API (Data Plane)
-
-Endpoint: `POST /upload`
-
-- Triggered automatically after `TAKE_PHOTO` command.
-- Payload: `multipart/form-data` containing the image file.
+| `SET_ZOOM` | `value: 0.0-1.0` | 线性调节数码变焦 |
+| `AUTO_FOCUS` | `none` | 强制触发系统级全局自动对焦 |
+| `TAKE_PHOTO` | `none` | 拍摄全像素原图并 POST 到 `/upload` |
